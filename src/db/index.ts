@@ -8,8 +8,14 @@ declare global {
 }
 
 function createPool() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL is not set. .env file check karen.");
+  let url = process.env.DATABASE_URL;
+  if (!url) {
+    // Build ke waqt DATABASE_URL ki zaroorat nahi. Live site pe ye zaroor set hona chahiye.
+    if (process.env.NEXT_PHASE !== "phase-production-build") {
+      console.error("❌ DATABASE_URL set nahi hai. Hosting ke Environment Variables mein DATABASE_URL add karein aur redeploy karein.");
+    }
+    url = "mysql://not-configured:not-configured@127.0.0.1:3306/not-configured";
+  }
   return mysql.createPool({
     uri: url,
     connectionLimit: Number(process.env.DATABASE_POOL_SIZE || 5),
